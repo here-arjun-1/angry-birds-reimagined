@@ -1,0 +1,12 @@
+body{
+  margin: 0;
+  min-width: 100vh;
+  overflow: hidden;
+
+  display: grid;
+  overflow: hidden;
+}
+
+canvas{
+  display: block ;
+}
