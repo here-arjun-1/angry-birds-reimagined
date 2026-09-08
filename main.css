@@ -1,0 +1,32 @@
+body{
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.menu{
+  background-image: url('./assets/images/menuBackground.webp');
+  background-size: cover;
+  object-position: center;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+}
+.play{
+  height: 80px;
+  width: 200px;
+  border: 3px solid #FF9800;
+  border-radius: 20px;
+  background-color: #FFD54F;
+  color: white;
+  font-size: 60px;
+  font-weight: bold;
+  -webkit-text-stroke: 2px #FF9800;
+  margin-bottom: 80px;
+  cursor: pointer;
+}
+
+
