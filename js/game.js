@@ -13,7 +13,7 @@ const pigSpriteSheet = new Image();
 pigSpriteSheet.src = "assets/images/pigSpritesheet.png";
 const redBird = new Image();
 redBird.src = "assets/images/redBirdSpritesheet.png";
-const groundHeight = 150;
+const groundHeight = 180;
 
 const gravity = 0.40;
 const maxPull = 130;
@@ -80,7 +80,7 @@ function updateBird(){
 
 const pig ={
   x: canvas.width-250,
-  y: canvas.height-groundHeight-40,
+  y: canvas.height-groundHeight-30,
 
   width: 80,
   height: 80,
@@ -132,7 +132,7 @@ function drawWood(x, y, width, height){
   ctx.fillRect(x,y, width,height);
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
-  ctx.strokeRect(x,y, width, height);
+  ctx.strokeRect(x,y, width,height);
 }
 
 function drawGlass(x, y, width, height){
@@ -147,29 +147,75 @@ function drawGlass(x, y, width, height){
 
 const woods =[{
     x: canvas.width-350,
-    y: canvas.height-groundHeight-210,
+    y: canvas.height-groundHeight-170,
     width: 40,
     height: 170,
-    destroyed: false
+    destroyed: false,
+    exploding: false,
+    explosionTimer: 0
   },
 
   {
     x: canvas.width-190,
-    y: canvas.height-groundHeight-210,
+    y: canvas.height-groundHeight-170,
     width: 40,
     height: 170,
-    destroyed: false
+    destroyed: false,
+    exploding: false,
+    explosionTimer: 0
   }
 ];
 
 const glasses =[{
     x: canvas.width-350,
-    y: canvas.height-groundHeight -250,
+    y: canvas.height-groundHeight -210,
     width: 200,
     height: 40,
-    destroyed: false
+    destroyed: false,
+    exploding: false,
+    explosionTimer: 0,
+    falling: false,
+    vy: 0
   }
 ];
+
+function drawExplosion(x,y,timer){
+  const radius = 10 + timer*2;
+  ctx.beginPath();
+  ctx.arc(x,y,radius,0,Math.PI*2);
+  ctx.fillStyle = "brown";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x,y,radius*0.5,0,Math.PI*2);
+  ctx.fillStyle = "orange";
+  ctx.fill();
+}
+
+function updateExplosions(){
+  for(let i=0;i<woods.length;i++){
+    const wood = woods[i];
+    if(wood.exploding){
+      wood.explosionTimer++;
+      if(wood.explosionTimer > 15){
+        wood.exploding = false;
+        wood.destroyed = true;
+        for(let j=0;j<glasses.length;j++){
+          glasses[j].falling = true;
+        }
+      }
+    }
+  }
+  for(let i=0;i<glasses.length;i++){
+    const glass = glasses[i];
+    if(glass.exploding){
+      glass.explosionTimer++;
+      if(glass.explosionTimer > 15){
+        glass.exploding = false;
+        glass.destroyed = true;
+      }
+    }
+  }
+}
 
 function drawObjects(){
   for(let i=0; i<woods.length; i++){
@@ -177,7 +223,17 @@ function drawObjects(){
     if(wood.destroyed){
       continue;
     }
-    drawWood(wood.x,wood.y,wood.width, wood.height);
+
+    if(wood.exploding){
+      drawExplosion(
+        wood.x + wood.width/2,
+        wood.y + wood.height/2,
+        wood.explosionTimer
+      );
+    }
+    else{
+      drawWood(wood.x,wood.y,wood.width, wood.height);
+    }
   }
 
   for(let i=0;i <glasses.length; i++){
@@ -185,7 +241,16 @@ function drawObjects(){
     if (glass.destroyed){
       continue;
     }
-    drawGlass(glass.x,glass.y,glass.width,glass.height);
+    if(glass.exploding){
+      drawExplosion(
+        glass.x + glass.width/2,
+        glass.y + glass.height/2,
+        glass.explosionTimer
+      );
+    }
+    else{
+      drawGlass(glass.x,glass.y,glass.width,glass.height);
+    }
   }
 }
 
@@ -195,7 +260,7 @@ function drawSlingShot(){
   ctx.beginPath();
   ctx.moveTo(point.x,point.y);
   ctx.lineTo(point.x-10,point.y+90);
-  
+
   ctx.moveTo(point.x,point.y);
   ctx.lineTo(point.x-10,point.y-90);
   ctx.stroke();
@@ -327,6 +392,26 @@ function updateBirdPhysics(){
   }
 }
 
+function updateGlassPhysics(){
+  for(let i=0;i<glasses.length;i++){
+    const glass = glasses[i];
+    if(glass.destroyed){
+      continue;
+    }
+    if(!glass.falling){
+      continue;
+    }
+    glass.vy += gravity;
+    glass.y += glass.vy;
+    const groundY = canvas.height-groundHeight;
+    if(glass.y+glass.height >= groundY){
+      glass.y = groundY-glass.height;
+      glass.vy = 0;
+      glass.falling = false;
+    }
+  }
+}
+
 function resetBird(){
   if(levelWon || levelFailed){
     return;
@@ -359,11 +444,13 @@ function checkWoodCollision(){
   }
   for (let i=0; i<woods.length; i++){
     const wood = woods[i];
-    if(wood.destroyed){
+
+    if(wood.destroyed || wood.exploding){
       continue;
     }
     if(circleRectCollision(bird, wood)){
-      wood.destroyed = true;
+      wood.exploding = true;
+      wood.explosionTimer = 0;
       score += 100;
       checkWin();
       if(levelWon){
@@ -379,11 +466,13 @@ function checkGlassCollision(){
   }
   for(let i=0; i<glasses.length; i++){
     const glass = glasses[i];
-    if(glass.destroyed){
+
+    if(glass.destroyed || glass.exploding){
       continue;
     }
     if(circleRectCollision(bird,glass)){
-      glass.destroyed = true;
+      glass.exploding = true;
+      glass.explosionTimer = 0;
       score += 200;
       checkWin();
       if(levelWon){
@@ -424,7 +513,7 @@ function checkCollisions(){
   checkPigCollision();
 }
 function checkWin(){
-  if( score >= 600 && !levelWon){
+  if(!pig.alive && !levelWon){
     levelWon = true;
     bird.active = false;
     bird.launch = false;
@@ -536,7 +625,9 @@ function gameLoop(){
     updateBird();
   }
   updateBirdPhysics();
+  updateGlassPhysics();
   updatePig();
+  updateExplosions();
   checkCollisions();
   render();
   requestAnimationFrame(gameLoop);
