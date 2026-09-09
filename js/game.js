@@ -15,6 +15,18 @@ const redBird = new Image();
 redBird.src = "assets/images/redBirdSpritesheet.png";
 const groundHeight = 180;
 
+const levelCompleteSound = new Audio();
+levelCompleteSound.src = 'assets/sounds/levelComplete.mp3';
+const levelFailedSound = new Audio();
+levelFailedSound.src = 'assets/sounds/levelFailed.mp3'
+const birdShoot = new Audio();
+birdShoot.src = 'assets/sounds/birdShoot.mp3'
+birdShoot.preload = "auto";
+birdShoot.volume = 0.8;
+const ambienceSound = new Audio();
+ambienceSound.src = 'assets/sounds/ambienceSound.mp3';
+ambienceSound.loop = true;
+
 const gravity = 0.40;
 const maxPull = 130;
 const launchPower = 0.30;
@@ -82,7 +94,7 @@ const pig ={
   x: canvas.width-250,
   y: canvas.height-groundHeight-30,
 
-  width: 80,
+  width: 100,
   height: 80,
   radius: 40,
   alive: true,
@@ -118,7 +130,7 @@ function updatePig(){
     return;
   }
   pig.frameTimer++;
-  if (pig.frameTimer >= 15){
+  if (pig.frameTimer >= 150){
     pig.frameTimer = 0;
     pig.frame++;
     if (pig.frame >= 6){
@@ -358,6 +370,8 @@ canvas.addEventListener("mousemove",function(e){
     }
     bird.x = point.x+disX;
     bird.y = point.y+disY;
+    birdShoot.currentTime = 0;
+    birdShoot.play();
   }
 );
 canvas.addEventListener("mouseup",function(){
@@ -473,6 +487,10 @@ function resetBird(){
   if (birdsLeft <= 0){
     levelFailed = true;
     bird.active = false;
+    levelFailedSound.currentTime =0;
+    levelFailedSound.play();
+    ambienceSound.pause();
+    ambienceSound.currentTime = 0;
     return;
   }
   bird.x = point.x;
@@ -567,6 +585,10 @@ function checkWin(){
     bird.active = false;
     bird.launch = false;
     drag = false;
+    levelCompleteSound.currentTime = 0;
+    levelCompleteSound.play();
+    ambienceSound.pause();
+    ambienceSound.currentTime = 0;
   }
 }
 function drawScore(){
@@ -611,7 +633,6 @@ function drawFailScreen(){
     canvas.width/2,
     canvas.height/2+20
   );
-
   ctx.font ="bold 25px Arial";
   ctx.fillText("No birds left!",canvas.width/2, canvas.height/2 + 70);
   ctx.textAlign = "left";
@@ -692,3 +713,4 @@ skyImage.onload = imageLoaded;
 groundImage.onload = imageLoaded;
 pigSpriteSheet.onload = imageLoaded;
 redBird.onload = imageLoaded;
+ambienceSound.play();
