@@ -13,6 +13,10 @@ const pigSpriteSheet = new Image();
 pigSpriteSheet.src = "assets/images/pigSpritesheet.png";
 const redBird = new Image();
 redBird.src = "assets/images/redBirdSpritesheet.png";
+const yellowBird = new Image();
+yellowBird.src = "assets/images/yellowBirdSpritesheet.png";
+const blackBird = new Image();
+blackBird.src = "assets/images/blackBirdSpritesheet.png";
 
 const groundHeight = 180;
 
@@ -59,8 +63,7 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: true,
-    color: "red",
-    sprite: true,
+    spriteSheet:redBird
   },
   {
     x: point.x,
@@ -74,8 +77,7 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: false,
-    color: "red",
-    sprite: true,
+    spriteSheet:redBird
   },
   {
     x: point.x,
@@ -89,8 +91,7 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: false,
-    color: "yellow",
-    sprite: false,
+    spriteSheet:yellowBird
   },
   {
     x: point.x,
@@ -104,60 +105,41 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: false,
-    color: "black",
-    sprite: false,
+    spriteSheet:blackBird
   },
 ];
 
 let currentBirdIndex = 0;
 let bird = birds[0];
 
-function drawBird() {
+function drawBird(){
   if (!bird.active) {
     return;
   }
-
-  if (bird.sprite) {
-    if (!redBird.complete) {
-      return;
-    }
-
-    const frameWidth = redBird.width / 4;
-    const frameHeight = redBird.height;
-
-    ctx.drawImage(
-      redBird,
-      bird.frame * frameWidth,
-      0,
-      frameWidth,
-      frameHeight,
-      bird.x - bird.width / 2,
-      bird.y - bird.height / 2,
-      bird.width,
-      bird.height,
-    );
-
+  const spriteSheet = bird.spriteSheet;
+  if (!spriteSheet.complete) {
     return;
   }
-
-  ctx.beginPath();
-  ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-  ctx.fillStyle = bird.color;
-  ctx.fill();
-  ctx.closePath();
+  const frameWidth = spriteSheet.width / 4;
+  const frameHeight = spriteSheet.height;
+  ctx.drawImage(
+    spriteSheet,
+    bird.frame * frameWidth,
+    0,
+    frameWidth,
+    frameHeight,
+    bird.x - bird.width / 2,
+    bird.y - bird.height / 2,
+    bird.width,
+    bird.height
+  );
 }
 
-function updateBird() {
-  if (!bird.sprite) {
-    return;
-  }
-
+function updateBird(){
   bird.frameTimer++;
-
-  if (bird.frameTimer >= 10) {
+  if (bird.frameTimer >= 20) {
     bird.frameTimer = 0;
     bird.frame++;
-
     if (bird.frame >= 4) {
       bird.frame = 0;
     }
@@ -167,33 +149,42 @@ function updateBird() {
 const pigs = [
   {
     x: canvas.width - 250,
-    y: canvas.height - groundHeight - 30,
+    y: canvas.height - groundHeight - 35,
     width: 100,
     height: 80,
     radius: 40,
     alive: true,
     frame: 0,
     frameTimer: 0,
+    vx: 0,
+    vy: 0,
+    falling: false,
   },
   {
     x: canvas.width - 450,
-    y: canvas.height - groundHeight - 30,
+    y: canvas.height - groundHeight - 35,
     width: 100,
     height: 80,
     radius: 40,
     alive: true,
     frame: 0,
     frameTimer: 0,
+    vx: 0,
+    vy: 0,
+    falling: false,
   },
   {
     x: canvas.width - 350,
-    y: canvas.height - groundHeight - 160,
+    y: canvas.height - groundHeight - 245,
     width: 100,
     height: 80,
     radius: 40,
     alive: true,
     frame: 0,
     frameTimer: 0,
+    vx: 0,
+    vy: 0,
+    falling: false,
   },
 ];
 
@@ -238,6 +229,63 @@ function updatePig(pig) {
     }
   }
 }
+function updatePigPhysics(pig){
+  if (!pig.alive) return;
+  const groundY = canvas.height - groundHeight;
+  if (!pig.falling) {
+    let supported = false;
+    for (const wood of woods) {
+      if (wood.destroyed || wood.exploding || wood.falling) continue;
+      const pigLeft = pig.x - pig.width / 2;
+      const pigRight = pig.x + pig.width / 2;
+      const woodLeft = wood.x;
+      const woodRight = wood.x + wood.width;
+      const pigBottom = pig.y + pig.height / 2;
+      if(
+        pigRight > woodLeft &&
+        pigLeft < woodRight &&
+        Math.abs(pigBottom - wood.y) < 10
+      ){
+        pig.y = wood.y - pig.height / 2;
+        pig.vy = 0;
+        supported = true;
+        break;
+      }
+    }
+    if (!supported) {
+      for(const glass of glasses){
+        if(glass.destroyed || glass.exploding || glass.falling){
+          continue;
+        }
+        const pigLeft = pig.x - pig.width / 2;
+        const pigRight = pig.x + pig.width / 2;
+        const glassLeft = glass.x;
+        const glassRight = glass.x + glass.width;
+        const pigBottom = pig.y + pig.height / 2;
+        if(pigRight > glassLeft && pigLeft < glassRight && Math.abs(pigBottom - glass.y) < 10
+        ){
+          pig.y = glass.y - pig.height / 2;
+          pig.vy = 0;
+          supported = true;
+          break;
+        }
+      }
+    }
+    if (!supported) {
+      pig.falling = true;
+    }
+  }
+  if (pig.falling) {
+    pig.vy += gravity;
+    pig.y += pig.vy;
+    const pigBottom = pig.y + pig.height / 2;
+    if (pigBottom >= groundY) {
+      pig.y = groundY - pig.height / 2;
+      pig.vy = 0;
+      pig.falling = false;
+    }
+  }
+}
 
 function drawWood(x, y, width, height) {
   ctx.fillStyle = "#9D6C3C";
@@ -257,7 +305,7 @@ function drawGlass(x, y, width, height) {
 
 const woods = [
   {
-    x: canvas.width - 350,
+    x: canvas.width - 545,
     y: canvas.height - groundHeight - 170,
     width: 40,
     height: 170,
@@ -271,7 +319,7 @@ const woods = [
     explosionTimer: 0,
   },
   {
-    x: canvas.width - 190,
+    x: canvas.width - 345,
     y: canvas.height - groundHeight - 170,
     width: 40,
     height: 170,
@@ -285,7 +333,7 @@ const woods = [
     explosionTimer: 0,
   },
   {
-    x: canvas.width - 510,
+    x: canvas.width - 185,
     y: canvas.height - groundHeight - 170,
     width: 40,
     height: 170,
@@ -299,10 +347,10 @@ const woods = [
     explosionTimer: 0,
   },
   {
-    x: canvas.width - 270,
-    y: canvas.height - groundHeight - 350,
+    x: canvas.width - 385,
+    y: canvas.height - groundHeight - 170,
     width: 40,
-    height: 150,
+    height: 170,
     destroyed: false,
     falling: false,
     vx: 0,
@@ -314,9 +362,9 @@ const woods = [
   },
 ];
 
-const glasses = [
+const glasses =[
   {
-    x: canvas.width - 350,
+    x: canvas.width - 345,
     y: canvas.height - groundHeight - 210,
     width: 200,
     height: 40,
@@ -327,8 +375,8 @@ const glasses = [
     vy: 0,
   },
   {
-    x: canvas.width - 500,
-    y: canvas.height - groundHeight - 390,
+    x: canvas.width - 545,
+    y: canvas.height - groundHeight - 210,
     width: 200,
     height: 40,
     destroyed: false,
@@ -495,6 +543,8 @@ canvas.addEventListener("mousemove", function (e) {
   }
   bird.x = point.x + disX;
   bird.y = point.y + disY;
+  birdShoot.currentTime = 0;
+  birdShoot.play();
 });
 
 window.addEventListener("mouseup", function () {
@@ -519,8 +569,6 @@ function launchBird() {
   bird.vy = pullY * launchPower;
   bird.launch = true;
   birdsLeft--;
-  birdShoot.currentTime = 0;
-  birdShoot.play().catch(() => {});
 }
 function updateBirdPhysics() {
   if (!bird.launch || !bird.active || levelWon) {
@@ -745,7 +793,7 @@ function checkWin() {
     }
   }
 
-  if (!levelWon && (alivePigs === 0 || score >= 1000)) {
+  if (!levelWon && (alivePigs === 0)) {
     levelWon = true;
     bird.active = false;
     bird.launch = false;
@@ -855,8 +903,9 @@ function gameLoop() {
   updateGlassPhysics();
 
   for (let i = 0; i < pigs.length; i++) {
-    updatePig(pigs[i]);
-  }
+  updatePigPhysics(pigs[i]);
+  updatePig(pigs[i]);
+}
 
   updateExplosions();
   checkCollisions();
@@ -868,7 +917,7 @@ function gameLoop() {
 function imageLoaded() {
   imagesLoaded++;
 
-  if (imagesLoaded === 4) {
+  if (imagesLoaded === 6) {
     gameLoop();
   }
 }
@@ -877,6 +926,8 @@ skyImage.onload = imageLoaded;
 groundImage.onload = imageLoaded;
 pigSpriteSheet.onload = imageLoaded;
 redBird.onload = imageLoaded;
+yellowBird.onload = imageLoaded;
+blackBird.onload = imageLoaded;
 
 ambienceSound.play().catch(() => {});
 
