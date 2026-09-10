@@ -2,6 +2,7 @@ const canvas = document.querySelector("canvas");
 
 const nextBtn = document.getElementById("nextBtn");
 const homeBtn = document.getElementById("menu")
+const refreshBtn = document.getElementById("refreshBtn");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -599,8 +600,8 @@ function checkWin(){
 function drawScore(){
   ctx.fillStyle = "white";
   ctx.font = "bold 30px Arial";
-  ctx.fillText("Score: " + score,30,45);
-  ctx.fillText("Birds: " + birdsLeft,30,80);
+  ctx.fillText("Score: " + score,canvas.width/2-10,45);
+  ctx.fillText("Birds: " + birdsLeft,canvas.width/2-150,45);
 }
 
 function drawWinScreen(){
@@ -726,4 +727,7 @@ nextBtn.addEventListener("click",function(){
 );
 homeBtn.addEventListener("click", function(){
   window.location.href ='menu.html';
+});
+refreshBtn.addEventListener("click", function(){
+  window.location.reload();
 });
