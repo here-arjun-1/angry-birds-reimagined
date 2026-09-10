@@ -6,7 +6,7 @@ canvas.height = window.innerHeight;
 const ctx = canvas.getContext("2d");
 
 const skyImage = new Image();
-skyImage.src = "assets/images/sky1.webp";
+skyImage.src = "assets/images/level2Bg.png";
 const groundImage = new Image();
 groundImage.src = "assets/images/ground1.png";
 const pigSpriteSheet = new Image();
@@ -672,6 +672,8 @@ function resetBird() {
     levelFailedSound.play().catch(() => {});
     ambienceSound.pause();
     ambienceSound.currentTime = 0;
+    nextBtn.textContent = "BACK";
+    nextBtn.style.display = "block";
     return;
   }
 
@@ -680,6 +682,8 @@ function resetBird() {
   if (currentBirdIndex >= birds.length) {
     levelFailed = true;
     bird.active = false;
+    nextBtn.textContent = "BACK";
+    nextBtn.style.display = "block";
     return;
   }
 
