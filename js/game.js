@@ -82,6 +82,39 @@ function drawBird(){
     bird.height
   );
 }
+function drawTrajectory(){
+  if(!bird.active){
+    return;
+  }
+  let disX = bird.x - point.x;
+  let disY = bird.y - point.y;
+  let distance = Math.sqrt(disX * disX + disY * disY);
+  if(distance > maxPull){
+    disX = (disX / distance) * maxPull;
+    disY = (disY / distance) * maxPull;
+  }
+  let startX = point.x;
+  let startY = point.y;
+  let vx = -disX * launchPower;
+  let vy = -disY * launchPower;
+  for(let i = 1; i <= 10; i++){
+    let t = i * 3;
+    let x = startX + vx * t;
+    let y = startY + vy * t + 0.5 * gravity * t * t;
+    if(drag){
+      ctx.save();
+      ctx.beginPath();
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
 function updateBird(){
   bird.frameTimer++;
   if(bird.frameTimer >= 10){
@@ -690,6 +723,7 @@ function render(){
   drawSlingShot();
   drawObjects();
   drawPig();
+  drawTrajectory();
   drawBird();
   drawScore();
   drawWinScreen();
