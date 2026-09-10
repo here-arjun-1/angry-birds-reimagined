@@ -1,5 +1,6 @@
 const canvas = document.querySelector("canvas");
 
+const nextBtn = document.getElementById("nextBtn");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -589,6 +590,8 @@ function checkWin(){
     levelCompleteSound.play();
     ambienceSound.pause();
     ambienceSound.currentTime = 0;
+    localStorage.setItem( "level2Unlocked", "true");
+    nextBtn.style.display = "block";
   }
 }
 function drawScore(){
@@ -714,3 +717,8 @@ groundImage.onload = imageLoaded;
 pigSpriteSheet.onload = imageLoaded;
 redBird.onload = imageLoaded;
 ambienceSound.play();
+
+nextBtn.addEventListener("click",function(){
+  window.location.href = "menu.html";
+  }
+);
