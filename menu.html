@@ -2,45 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="icon" type="image/png" href="./assets/images/angryBird.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+  <title>Select Level</title>
+  <link rel="icon" type="image/png" href="./assets/images/angryBird.png" >
   <link rel="stylesheet" href="./css/menu.css">
+
 </head>
 <body>
   <div class="level-menu">
     <h1 class="title">SELECT LEVEL</h1>
     <div class="levels">
+
       <button class="level unlocked" onclick="window.location.href='./game.html'">
         <span>1</span>
       </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      <button class="level locked">
-          <span>🔒</span>
-      </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      <button class="level locked">
-        <span>🔒</span>
-      </button>
-      </div>
 
-      <button class="back" onclick="window.location.href = './index.html'">
-          BACK
+      <button id="level2" class="level locked">
+        <span>🔒</span>
       </button>
-      <audio id="themeMusic" src="./assets/sounds/themeMusic.mp3" autoplay loop></audio>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+
+      <button class="level locked">
+        <span>🔒</span>
+      </button>
+    </div>
+
+    <button class="back" onclick="window.location.href='./index.html'">
+      BACK
+    </button>
+    <audio id="themeMusic" src="./assets/sounds/themeMusic.mp3" autoplay loop></audio>
   </div>
+  <script>
+    const level2 =  document.getElementById("level2");
+    const level2Unlocked =localStorage.getItem("level2Unlocked");
+
+    if(level2Unlocked == "true"){
+      level2.classList.remove("locked")
+      level2.classList.add("unlocked");
+      level2.innerHTML = "<span>2</span>";
+      level2.onclick = function(){
+        window.location.href =
+          "./level2.html";
+      };
+    }
+  </script>
 </body>
 </html>
