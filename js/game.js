@@ -1,6 +1,7 @@
 const canvas = document.querySelector("canvas");
 
 const nextBtn = document.getElementById("nextBtn");
+const homeBtn = document.getElementById("menu")
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -492,6 +493,7 @@ function resetBird(){
     levelFailedSound.play();
     ambienceSound.pause();
     ambienceSound.currentTime = 0;
+    homeBtn.style.display = "block";
     return;
   }
   bird.x = point.x;
@@ -722,3 +724,6 @@ nextBtn.addEventListener("click",function(){
   window.location.href = "menu.html";
   }
 );
+homeBtn.addEventListener("click", function(){
+  window.location.href ='menu.html';
+});
