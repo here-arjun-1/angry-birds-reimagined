@@ -59,6 +59,10 @@ const bird = {
   launch: false,
   active: true,
 };
+const birdQueue = [
+  redBird,
+  redBird
+];
 
 function drawBird() {
   if (!bird.active) {
@@ -80,6 +84,30 @@ function drawBird() {
     bird.width,
     bird.height,
   );
+}
+function drawBirdQueue(){
+  const startX = 50;
+  const startY = canvas.height - groundHeight + 45;
+  const spacing = 65;
+  for(let i = 0; i < birdQueue.length; i++){
+    const queueBird = birdQueue[i];
+    if(!queueBird.complete){
+      continue;
+    }
+    const frameWidth = queueBird.width / 4;
+    const frameHeight = queueBird.height;
+    ctx.drawImage(
+      queueBird,
+      0,
+      0,
+      frameWidth,
+      frameHeight,
+      startX + i * spacing - 25,
+      startY - 25,
+      50,
+      50
+    );
+  }
 }
 
 function drawTrajectory() {
@@ -694,6 +722,7 @@ function resetBird() {
   if (levelWon || levelFailed) {
     return;
   }
+  birdQueue.shift();
   if (birdsLeft <= 0) {
     levelFailed = true;
     bird.active = false;
@@ -933,6 +962,7 @@ function render() {
   drawPig();
   drawTrajectory();
   drawBird();
+  drawBirdQueue();
   drawScore();
   drawWinScreen();
   drawFailScreen();
