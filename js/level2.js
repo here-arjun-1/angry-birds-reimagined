@@ -139,6 +139,22 @@ function drawBird(){
   );
 }
 
+function drawBirdQueue(){
+  const startX = 50;
+  const startY = canvas.height - groundHeight + 45;
+  const spacing = 65;
+  for(let i = currentBirdIndex + 1; i < birds.length; i++){
+    const queueBird = birds[i];
+    if(!queueBird.spriteSheet.complete){
+      continue;
+    }
+    const frameWidth = queueBird.spriteSheet.width / 4;
+    const frameHeight = queueBird.spriteSheet.height;
+    const queueX = startX + (i - currentBirdIndex - 1) * spacing;
+    ctx.drawImage(queueBird.spriteSheet,0,0,frameWidth,frameHeight,queueX - 25,startY - 25,50,50);
+  }
+}
+
 function updateBird(){
   bird.frameTimer++;
   if (bird.frameTimer >= 20) {
@@ -935,6 +951,7 @@ function render() {
   }
   drawTrajectory();
   drawBird();
+  drawBirdQueue();
   drawScore();
   drawWinScreen();
   drawFailScreen();
