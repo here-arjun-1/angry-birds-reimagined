@@ -2,6 +2,7 @@ const canvas = document.querySelector("canvas");
 const nextBtn = document.getElementById("nextBtn");
 const homeBtn = document.getElementById("menu");
 const refreshBtn = document.getElementById("refreshBtn"); 
+const musicBtn = document.getElementById("musicBtn");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -36,6 +37,7 @@ birdShoot.volume = 0.8;
 const ambienceSound = new Audio();
 ambienceSound.src = "assets/sounds/ambienceSound.mp3";
 ambienceSound.loop = true;
+let musicOn = true;
 
 const gravity = 0.4;
 const maxPull = 130;
@@ -578,8 +580,10 @@ canvas.addEventListener("mousemove", function (e) {
   }
   bird.x = point.x + disX;
   bird.y = point.y + disY;
-  birdShoot.currentTime = 0;
-  birdShoot.play();
+  if(musicOn){
+    birdShoot.currentTime = 0;
+    birdShoot.play();
+  }
 });
 
 window.addEventListener("mouseup", function () {
@@ -703,10 +707,12 @@ function resetBird() {
     levelFailed = true;
     bird.active = false;
 
-    levelFailedSound.currentTime = 0;
-    levelFailedSound.play().catch(() => {});
-    ambienceSound.pause();
-    ambienceSound.currentTime = 0;
+    if(musicOn){
+      levelFailedSound.currentTime =0;
+      levelFailedSound.play();
+      ambienceSound.pause();
+      ambienceSound.currentTime = 0;
+    }
     nextBtn.textContent = "BACK";
     nextBtn.style.display = "block";
     return;
@@ -837,10 +843,12 @@ function checkWin() {
     bird.active = false;
     bird.launch = false;
     drag = false;
-    levelCompleteSound.currentTime = 0;
-    levelCompleteSound.play().catch(() => {});
-    ambienceSound.pause();
-    ambienceSound.currentTime = 0;
+    if(musicOn){
+      levelCompleteSound.currentTime =0;
+      levelCompleteSound.play();
+      ambienceSound.pause();
+      ambienceSound.currentTime = 0;
+    }
     nextBtn.style.display = "block";
   }
 }
@@ -978,4 +986,19 @@ homeBtn.addEventListener("click",function(){
 });
 refreshBtn.addEventListener("click",function(){
   window.location.reload();
+});
+
+musicBtn.addEventListener("click",function(){
+  musicOn = !musicOn;
+  if(musicOn){
+    ambienceSound.play();
+    musicBtn.textContent = "MUSIC ON";
+  }
+  else{
+    ambienceSound.pause();
+    levelCompleteSound.pause();
+    levelFailedSound.pause();
+    birdShoot.pause();
+    musicBtn.textContent = "MUSIC OFF";
+  }
 });
