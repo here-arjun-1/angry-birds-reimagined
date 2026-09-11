@@ -515,23 +515,26 @@ function drawObjects() {
   }
 }
 
-function drawSlingShot() {
+function drawSlingShot(){
   ctx.strokeStyle = "brown";
   ctx.lineWidth = 12;
   ctx.beginPath();
   ctx.moveTo(point.x, point.y);
-  ctx.lineTo(point.x - 10, point.y + 90);
-  ctx.moveTo(point.x, point.y);
-  ctx.lineTo(point.x - 10, point.y - 90);
-  ctx.stroke();
+  ctx.lineTo(point.x - 50, point.y - 70);
 
+  ctx.moveTo(point.x, point.y);
+  ctx.lineTo(point.x + 50, point.y - 70);
+  
+  ctx.moveTo(point.x, point.y);
+  ctx.lineTo(point.x, point.y + 100);
+  ctx.stroke();
   if (drag) {
     ctx.strokeStyle = "#3b2415";
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(point.x, point.y - 25);
+    ctx.moveTo(point.x - 25, point.y - 35);
     ctx.lineTo(bird.x, bird.y);
-    ctx.lineTo(point.x, point.y + 25);
+    ctx.lineTo(point.x + 25, point.y - 35);
     ctx.stroke();
   }
 }
