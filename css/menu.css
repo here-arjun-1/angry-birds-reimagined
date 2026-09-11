@@ -54,3 +54,17 @@ body{
     font-weight: bold;
     cursor: pointer;
 }
+#musicBtn{
+  height: 40px;
+  width: 120px;
+  border: 2px solid black;
+  border-radius: 10px;
+  background-color: #ffd752;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  position: absolute;
+  left: 20px;
+}

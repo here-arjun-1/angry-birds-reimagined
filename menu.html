@@ -9,6 +9,7 @@
 
 </head>
 <body>
+  <button id="musicBtn">MUSIC ON</button>
   <div class="level-menu">
     <h1 class="title">SELECT LEVEL</h1>
     <div class="levels">
@@ -54,6 +55,20 @@
   <script>
     const level2 =  document.getElementById("level2");
     const level2Unlocked =localStorage.getItem("level2Unlocked");
+    const music = document.getElementById("themeMusic");
+    const musicBtn = document.getElementById("musicBtn");
+    let musicOn = true;
+    musicBtn.addEventListener("click",function(){
+      musicOn = !musicOn;
+      if(musicOn){
+        music.play();
+        musicBtn.textContent = "MUSIC ON";
+      }
+      else{
+        music.pause();
+        musicBtn.textContent = "MUSIC OFF";
+      }
+    });
 
     if(level2Unlocked == "true"){
       level2.classList.remove("locked")

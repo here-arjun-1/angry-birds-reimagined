@@ -24,6 +24,18 @@ canvas{
   border-radius: 10px;
   cursor: pointer;
 }
+#musicBtn{
+  height: 40px;
+  width: 120px;
+  border: 2px solid white;
+  border-radius: 10px;
+  background-color: #FFD54F;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 5px;
+}
 
 .game-buttons{
   position: fixed;
