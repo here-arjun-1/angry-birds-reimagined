@@ -95,6 +95,8 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: false,
+    abilityUsed: false,
+    type :'yellow',
     spriteSheet:yellowBird
   },
   {
@@ -109,6 +111,8 @@ const birds = [
     frameTimer: 0,
     launch: false,
     active: false,
+    abilityUsed: false,
+    type:'black',
     spriteSheet:blackBird
   },
 ];
@@ -118,6 +122,10 @@ let bird = birds[0];
 
 function drawBird(){
   if (!bird.active) {
+    return;
+  }
+  if (bird.exploding) {
+    drawExplosion(bird.x, bird.y, bird.explosionTimer);
     return;
   }
   const spriteSheet = bird.spriteSheet;
@@ -435,6 +443,8 @@ const glasses =[
     explosionTimer: 0,
     falling: false,
     vy: 0,
+    angle: 0,
+    angularVelocity: 0,
   },
   {
     x: canvas.width - 545,
@@ -446,11 +456,13 @@ const glasses =[
     explosionTimer: 0,
     falling: false,
     vy: 0,
+    angle: 0,
+    angularVelocity: 0,
   },
 ];
 
 function drawExplosion(x, y, timer) {
-  const radius = 10 + timer * 2;
+  const radius = 10 + timer * 5;
 
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -458,12 +470,72 @@ function drawExplosion(x, y, timer) {
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(x, y, radius * 0.5, 0, Math.PI * 2);
+  ctx.arc(x, y, radius * 0.65, 0, Math.PI * 2);
   ctx.fillStyle = "orange";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 0.3, 0, Math.PI * 2);
+  ctx.fillStyle = "yellow";
   ctx.fill();
 }
 
 function updateExplosions() {
+  if (bird.exploding) {
+    bird.explosionTimer++;
+    const explosionRadius = 150;
+    if (bird.explosionTimer === 1){
+      for (let i=0; i<woods.length;i++){
+        const wood = woods[i];
+        if(wood.destroyed || wood.exploding){
+          continue;
+        }
+        const disX = bird.x - (wood.x + wood.width / 2);
+        const disY = bird.y - (wood.y + wood.height / 2);
+        const distance = Math.sqrt(disX * disX + disY * disY);
+        if(distance <= explosionRadius){
+          wood.exploding = true;
+          wood.explosionTimer = 0;
+          score += 100;
+        }
+      }
+      for(let i = 0; i < glasses.length; i++){
+        const glass = glasses[i];
+        if(glass.destroyed || glass.exploding){
+          continue;
+        }
+        const disX = bird.x - (glass.x + glass.width / 2);
+        const disY = bird.y - (glass.y + glass.height / 2);
+        const distance = Math.sqrt(disX * disX + disY * disY);
+        if(distance <= explosionRadius){
+          glass.exploding = true;
+          glass.explosionTimer = 0;
+          score += 200;
+        }
+      }
+      for(let i = 0; i < pigs.length; i++){
+        const pig = pigs[i];
+        if(!pig.alive){
+          continue;
+        }
+        const disX = bird.x - pig.x;
+        const disY = bird.y - pig.y;
+        const distance = Math.sqrt(disX * disX + disY * disY);
+        if (distance <= explosionRadius + pig.radius) {
+          pig.alive = false;
+          score += 300;
+        }
+      }
+    }
+    if(bird.explosionTimer > 20){
+      bird.exploding = false;
+      bird.active = false;
+      bird.launch = false;
+      checkWin();
+      if(!levelWon) {
+        setTimeout(resetBird, 300);
+      }
+    }
+  }
   for (let i = 0; i < woods.length; i++) {
     const wood = woods[i];
     if (wood.exploding) {
@@ -475,19 +547,28 @@ function updateExplosions() {
     }
   }
 
-  let allWoodsDestroyed = true;
-
-  for (let i = 0; i < woods.length; i++) {
-    if (!woods[i].destroyed) {
-      allWoodsDestroyed = false;
-      break;
+  for (let i = 0; i < glasses.length; i++) {
+    const glass = glasses[i];
+    if (glass.destroyed || glass.exploding || glass.falling) {
+      continue;
     }
-  }
-
-  if (allWoodsDestroyed) {
-    for (let i = 0; i < glasses.length; i++) {
-      if (!glasses[i].destroyed) {
-        glasses[i].falling = true;
+    for (let j = 0; j < woods.length; j++) {
+      const wood = woods[j];
+      if (!wood.destroyed) {
+        continue;
+      }
+      const glassLeft = glass.x;
+      const glassRight = glass.x + glass.width;
+      const woodLeft = wood.x;
+      const woodRight = wood.x + wood.width;
+      if (
+        glassRight > woodLeft &&
+        glassLeft < woodRight &&
+        Math.abs(glass.y + glass.height - wood.y) < 10
+      ) {
+        glass.falling = true;
+        glass.angularVelocity = 0.04;
+        break;
       }
     }
   }
@@ -537,7 +618,11 @@ function drawObjects() {
         glass.explosionTimer,
       );
     } else {
-      drawGlass(glass.x, glass.y, glass.width, glass.height);
+      ctx.save();
+      ctx.translate(glass.x, glass.y);
+      ctx.rotate(glass.angle);
+      drawGlass(0, 0, glass.width, glass.height);
+      ctx.restore();
     }
   }
 }
@@ -579,16 +664,27 @@ canvas.addEventListener("mousedown", function (e) {
   if (levelWon || levelFailed) {
     return;
   }
-  if (birdsLeft <= 0) {
+  if (bird.launch){
+    if (bird.type === "yellow" && !bird.abilityUsed) {
+      bird.vx *= 2.5;
+      bird.vy *= 2.5;
+      bird.abilityUsed = true;
+    }
+    else if (bird.type === "black" && !bird.abilityUsed) {
+      bird.abilityUsed = true;
+      bird.exploding = true;
+      bird.explosionTimer = 0;
+      bird.launch = false;
+    }
     return;
   }
-  if (bird.launch) {
+  if (birdsLeft <= 0) {
     return;
   }
   const mouse = getMousePosition(e);
   let disX = mouse.x - bird.x;
   let disY = mouse.y - bird.y;
-  const dist = Math.sqrt(disX * disX + disY * disY);
+  const dist = Math.sqrt(disX ** 2 + disY ** 2);
   if (dist <= bird.radius) {
     drag = true;
   }
@@ -702,24 +798,25 @@ function updateGlassPhysics() {
   for (let i = 0; i < glasses.length; i++) {
     const glass = glasses[i];
 
-    if (glass.destroyed) {
+    if (glass.destroyed || glass.exploding || !glass.falling) {
       continue;
     }
-    if (glass.exploding) {
-      continue;
-    }
-    if (!glass.falling) {
-      continue;
-    }
+
+    glass.angle += glass.angularVelocity;
+    glass.angularVelocity += 0.002;
     glass.vy += gravity;
     glass.y += glass.vy;
 
     const groundY = canvas.height - groundHeight;
+    const bottomY =
+      glass.y +
+      glass.width * Math.sin(glass.angle) +
+      glass.height * Math.cos(glass.angle);
 
-    if (glass.y + glass.height >= groundY) {
-      glass.y = groundY - glass.height;
-      glass.vy = 0;
+    if (bottomY >= groundY || glass.angle >= Math.PI / 2) {
+      glass.angle = Math.min(glass.angle, Math.PI / 2);
       glass.falling = false;
+      glass.vy = 0;
       glass.exploding = true;
       glass.explosionTimer = 0;
     }
