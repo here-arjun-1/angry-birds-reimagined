@@ -754,14 +754,6 @@ function updateBirdPhysics() {
       setTimeout(resetBird, 500);
     }
   }
-  if (bird.x - bird.radius <= 0) {
-    bird.x = bird.radius;
-    bird.vx *= -0.5;
-  }
-  if (bird.y - bird.radius <= 0) {
-    bird.y = bird.radius;
-    bird.vy *= -0.5;
-  }
   if (bird.y > canvas.height + 200) {
     bird.launch = false;
 
